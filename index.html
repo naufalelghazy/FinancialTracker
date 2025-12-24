@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0f0f23" />
+    <meta
+      name="description"
+      content="Personal Financial Tracker - Track income and expenses"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <title>💰 Financial Tracker</title>
+
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-content">
+          <h1>💰 Financial Tracker</h1>
+          <button id="settingsBtn" class="icon-btn" aria-label="Settings">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.364-6.364l-4.243 4.243m-6.364 6.364l4.243-4.243m12.728 0l-4.243-4.243m-6.364-6.364L6.636 6.636"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Transaction Type Toggle -->
+        <div class="transaction-toggle">
+          <button
+            type="button"
+            class="toggle-btn active"
+            data-type="pengeluaran"
+          >
+            <span class="toggle-icon">📤</span>
+            <span>Pengeluaran</span>
+          </button>
+          <button type="button" class="toggle-btn" data-type="pemasukan">
+            <span class="toggle-icon">📥</span>
+            <span>Pemasukan</span>
+          </button>
+        </div>
+
+        <!-- Transaction Form -->
+        <form id="transactionForm" class="transaction-form">
+          <!-- Amount Input -->
+          <div class="form-group amount-group">
+            <label for="amount">Jumlah</label>
+            <div class="amount-input-wrapper">
+              <span class="currency-prefix">Rp</span>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                placeholder="0"
+                inputmode="numeric"
+                required
+                min="1"
+              />
+            </div>
+          </div>
+
+          <!-- Account Selection -->
+          <div class="form-group">
+            <label for="account">Akun</label>
+            <div class="select-wrapper">
+              <select id="account" name="account" required>
+                <option value="">Pilih Akun</option>
+                <option value="CASH">💵 CASH</option>
+                <option value="KROM">🟣 KROM</option>
+                <option value="BCA">🔵 BCA</option>
+                <option value="JAGO">🟡 JAGO</option>
+                <option value="ShopeePay">🟠 ShopeePay</option>
+                <option value="DANA">🔵 DANA</option>
+                <option value="GOPAY">🟢 GOPAY</option>
+                <option value="SEABANK">🔵 SEABANK</option>
+                <option value="Mandiri">🟡 Mandiri</option>
+                <option value="SUPERBANK">🟣 SUPERBANK</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+          </div>
+
+          <!-- Category Selection -->
+          <div class="form-group">
+            <label for="category">Kategori</label>
+            <div class="select-wrapper">
+              <select id="category" name="category" required>
+                <option value="">Pilih Kategori</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+          </div>
+
+          <!-- Date Input -->
+          <div class="form-group">
+            <label for="date">Tanggal</label>
+            <input type="date" id="date" name="date" required />
+          </div>
+
+          <!-- Notes Input -->
+          <div class="form-group">
+            <label for="notes"
+              >Catatan <span class="optional">(opsional)</span></label
+            >
+            <textarea
+              id="notes"
+              name="notes"
+              placeholder="Tambahkan catatan..."
+              rows="2"
+            ></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span class="btn-text">Simpan Transaksi</span>
+            <span class="btn-loader" hidden>
+              <svg class="spinner" viewBox="0 0 24 24">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  fill="none"
+                  stroke-dasharray="31.416"
+                  stroke-dashoffset="10"
+                ></circle>
+              </svg>
+            </span>
+          </button>
+        </form>
+      </main>
+
+      <!-- Settings Modal -->
+      <div id="settingsModal" class="modal" hidden>
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>⚙️ Pengaturan</h2>
+            <button type="button" class="close-btn" id="closeSettings">
+              &times;
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="scriptUrl">Google Apps Script URL</label>
+              <input
+                type="url"
+                id="scriptUrl"
+                placeholder="https://script.google.com/macros/s/..."
+              />
+              <p class="help-text">
+                Masukkan URL deployment dari Google Apps Script Anda
+              </p>
+            </div>
+            <button type="button" class="save-settings-btn" id="saveSettings">
+              💾 Simpan Pengaturan
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast Notification -->
+      <div id="toast" class="toast" hidden>
+        <span class="toast-icon"></span>
+        <span class="toast-message"></span>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

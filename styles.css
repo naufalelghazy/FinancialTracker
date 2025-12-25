@@ -153,7 +153,7 @@ body::before {
 
 .app-header h1 {
   font-size: var(--font-size-xl);
-  font-weight: 700;
+  font-weight: 800;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

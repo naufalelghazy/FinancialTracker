@@ -3,7 +3,7 @@
   "short_name": "FinTracker",
   "description": "Personal Financial Tracker - Track income and expenses",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "./", 
   "display": "standalone",
   "background_color": "#0f0f23",
   "theme_color": "#0f0f23",

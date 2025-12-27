@@ -50,7 +50,11 @@ const elements = {
   toggleBtns: document.querySelectorAll(".toggle-btn"),
   amountInput: document.getElementById("amount"),
   accountSelect: document.getElementById("account"),
+  accountLabel: document.getElementById("accountLabel"),
+  destAccountSelect: document.getElementById("destAccount"),
+  destAccountGroup: document.getElementById("destAccountGroup"),
   categorySelect: document.getElementById("category"),
+  categoryGroup: document.getElementById("categoryGroup"),
   dateInput: document.getElementById("date"),
   notesInput: document.getElementById("notes"),
   submitBtn: document.getElementById("submitBtn"),
@@ -79,6 +83,7 @@ function init() {
   updateCategories();
   loadSettings();
   attachEventListeners();
+  setInitialUIState();
 
   // Register service worker for PWA
   if ("serviceWorker" in navigator) {
@@ -86,6 +91,16 @@ function init() {
       console.log("Service Worker registration failed:", err);
     });
   }
+}
+
+// Set initial UI state based on default transaction type
+function setInitialUIState() {
+  const isTransfer = state.transactionType === "transfer";
+  elements.destAccountGroup.hidden = !isTransfer;
+  elements.destAccountSelect.required = isTransfer;
+  elements.categoryGroup.hidden = isTransfer;
+  elements.categorySelect.required = !isTransfer;
+  elements.accountLabel.textContent = isTransfer ? "Dari Akun" : "Akun";
 }
 
 // Set default date to today
@@ -134,8 +149,8 @@ function attachEventListeners() {
   elements.modalOverlay.addEventListener("click", closeSettings);
   elements.saveSettingsBtn.addEventListener("click", saveSettings);
 
-  // Format amount on blur
-  elements.amountInput.addEventListener("blur", formatAmount);
+  // Format amount on input (show dots for thousands)
+  elements.amountInput.addEventListener("input", formatAmountDisplay);
 
   // Prevent form submission on Enter in certain fields
   elements.notesInput.addEventListener("keydown", (e) => {
@@ -150,6 +165,22 @@ function handleToggle(clickedBtn) {
   elements.toggleBtns.forEach((btn) => btn.classList.remove("active"));
   clickedBtn.classList.add("active");
   state.transactionType = clickedBtn.dataset.type;
+  
+  // Update UI based on transaction type
+  const isTransfer = state.transactionType === "transfer";
+  
+  // Show/hide destination account for transfer
+  elements.destAccountGroup.hidden = !isTransfer;
+  elements.destAccountSelect.required = isTransfer;
+  
+  // Show/hide category for non-transfer
+  elements.categoryGroup.hidden = isTransfer;
+  elements.categorySelect.required = !isTransfer;
+  
+  // Update account label
+  elements.accountLabel.textContent = isTransfer ? "Dari Akun" : "Akun";
+  
+  // Update categories
   updateCategories();
 
   // Add haptic feedback if available
@@ -158,12 +189,28 @@ function handleToggle(clickedBtn) {
   }
 }
 
-// Format amount input
-function formatAmount() {
-  const value = elements.amountInput.value;
+// Format amount display with thousand separators (dots)
+function formatAmountDisplay(e) {
+  // Get raw numbers only
+  let value = e.target.value.replace(/\D/g, "");
+  
+  // Remove leading zeros
+  value = value.replace(/^0+/, "") || "";
+  
+  // Format with dots for thousands
   if (value) {
-    elements.amountInput.value = Math.abs(parseInt(value, 10)) || "";
+    value = parseInt(value, 10).toLocaleString("id-ID");
   }
+  
+  // Update input value
+  e.target.value = value;
+}
+
+// Get raw amount value (without dots)
+function getRawAmount() {
+  const formatted = elements.amountInput.value;
+  const raw = formatted.replace(/\./g, "");
+  return parseInt(raw, 10) || 0;
 }
 
 // Handle form submission
@@ -177,48 +224,114 @@ async function handleSubmit(e) {
     return;
   }
 
-  // Get form data
-  const formData = {
-    tipe: state.transactionType === "pemasukan" ? "Pemasukan" : "Pengeluaran",
-    jumlah: parseInt(elements.amountInput.value, 10),
-    akun: elements.accountSelect.value,
-    kategori: elements.categorySelect.value,
-    tanggal: elements.dateInput.value,
-    catatan: elements.notesInput.value.trim(),
-  };
+  const jumlah = getRawAmount();
+  const sourceAccount = elements.accountSelect.value;
+  const tanggal = elements.dateInput.value;
+  const catatan = elements.notesInput.value.trim();
 
-  // Validate required fields
-  if (
-    !formData.jumlah ||
-    !formData.akun ||
-    !formData.kategori ||
-    !formData.tanggal
-  ) {
+  // Validate common required fields
+  if (!jumlah || !sourceAccount || !tanggal) {
     showToast("error", "⚠️ Mohon lengkapi semua field yang diperlukan");
     return;
   }
 
-  // Show loading state
+  // Handle Transfer Mode
+  if (state.transactionType === "transfer") {
+    const destAccount = elements.destAccountSelect.value;
+    
+    if (!destAccount) {
+      showToast("error", "⚠️ Pilih akun tujuan");
+      return;
+    }
+    
+    if (sourceAccount === destAccount) {
+      showToast("error", "⚠️ Akun asal dan tujuan tidak boleh sama");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Create Pengeluaran entry (money out from source)
+      const pengeluaranData = {
+        tipe: "Pengeluaran",
+        jumlah: jumlah,
+        akun: sourceAccount,
+        kategori: "Pindah Akun",
+        tanggal: tanggal,
+        catatan: catatan ? `Transfer ke ${destAccount}: ${catatan}` : `Transfer ke ${destAccount}`,
+      };
+
+      // Create Pemasukan entry (money in to destination)
+      const pemasukanData = {
+        tipe: "Pemasukan",
+        jumlah: jumlah,
+        akun: destAccount,
+        kategori: "Pindah Akun",
+        tanggal: tanggal,
+        catatan: catatan ? `Transfer dari ${sourceAccount}: ${catatan}` : `Transfer dari ${sourceAccount}`,
+      };
+
+      // Send both entries
+      await fetch(state.scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pengeluaranData),
+      });
+
+      await fetch(state.scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pemasukanData),
+      });
+
+      showToast("success", "✅ Transfer berhasil dicatat!");
+      resetForm();
+
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 50, 50]);
+      }
+    } catch (error) {
+      console.error("Error submitting transfer:", error);
+      showToast("error", "❌ Gagal menyimpan. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+    return;
+  }
+
+  // Handle Regular Transaction (Pemasukan/Pengeluaran)
+  const kategori = elements.categorySelect.value;
+  
+  if (!kategori) {
+    showToast("error", "⚠️ Pilih kategori transaksi");
+    return;
+  }
+
+  const formData = {
+    tipe: state.transactionType === "pemasukan" ? "Pemasukan" : "Pengeluaran",
+    jumlah: jumlah,
+    akun: sourceAccount,
+    kategori: kategori,
+    tanggal: tanggal,
+    catatan: catatan,
+  };
+
   setLoading(true);
 
   try {
-    // Send data to Google Apps Script
-    const response = await fetch(state.scriptUrl, {
+    await fetch(state.scriptUrl, {
       method: "POST",
-      mode: "no-cors", // Required for Apps Script
-      headers: {
-        "Content-Type": "application/json",
-      },
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     });
 
-    // Since no-cors doesn't return response, assume success
     showToast("success", "✅ Transaksi berhasil disimpan!");
-
-    // Reset form
     resetForm();
 
-    // Haptic feedback
     if (navigator.vibrate) {
       navigator.vibrate([50, 50, 50]);
     }
@@ -234,6 +347,7 @@ async function handleSubmit(e) {
 function resetForm() {
   elements.amountInput.value = "";
   elements.accountSelect.value = "";
+  elements.destAccountSelect.value = "";
   elements.categorySelect.value = "";
   elements.notesInput.value = "";
   setDefaultDate();

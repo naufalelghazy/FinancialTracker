@@ -70,11 +70,15 @@
             data-type="pengeluaran"
           >
             <span class="toggle-icon">📤</span>
-            <span>Pengeluaran</span>
+            <span>Keluar</span>
+          </button>
+          <button type="button" class="toggle-btn" data-type="transfer">
+            <span class="toggle-icon">🔄</span>
+            <span>Transfer</span>
           </button>
           <button type="button" class="toggle-btn" data-type="pemasukan">
             <span class="toggle-icon">📥</span>
-            <span>Pemasukan</span>
+            <span>Masuk</span>
           </button>
         </div>
 
@@ -86,29 +90,28 @@
             <div class="amount-input-wrapper">
               <span class="currency-prefix">Rp</span>
               <input
-                type="number"
+                type="text"
                 id="amount"
                 name="amount"
                 placeholder="0"
                 inputmode="numeric"
                 required
-                min="1"
               />
             </div>
           </div>
 
-          <!-- Account Selection -->
-          <div class="form-group">
-            <label for="account">Akun</label>
+          <!-- Account Selection (Source) -->
+          <div class="form-group" id="accountGroup">
+            <label for="account" id="accountLabel">Akun</label>
             <div class="select-wrapper">
               <select id="account" name="account" required>
-                <option value="">Pilih Akun</option>
+                 <option value="">Pilih Akun Tujuan</option>
                 <option value="CASH">💵 CASH</option>
                 <option value="BCA">🔵 BCA</option>
                 <option value="MANDIRI">🟡 MANDIRI</option>
                 <option value="KROM">🟣 KROM</option>
                 <option value="JAGO">🟡 JAGO</option>
-                <option value="SUPERBANK">🟣 SUPERBANK</option>
+                <option value="SUPERBANK">🟠 SUPERBANK</option>
                 <option value="SEABANK">🔵 SEABANK</option>
                 <option value="GOPAY">🟢 GOPAY</option>
                 <option value="SHOPEEPAY">🟠 SHOPEEPAY</option>
@@ -118,8 +121,29 @@
             </div>
           </div>
 
-          <!-- Category Selection -->
-          <div class="form-group">
+          <!-- Destination Account (Transfer Only) -->
+          <div class="form-group" id="destAccountGroup" hidden>
+            <label for="destAccount">Ke Akun</label>
+            <div class="select-wrapper">
+              <select id="destAccount" name="destAccount">
+                <option value="">Pilih Akun Tujuan</option>
+                <option value="CASH">💵 CASH</option>
+                <option value="BCA">🔵 BCA</option>
+                <option value="MANDIRI">🟡 MANDIRI</option>
+                <option value="KROM">🟣 KROM</option>
+                <option value="JAGO">🟡 JAGO</option>
+                <option value="SUPERBANK">🟠 SUPERBANK</option>
+                <option value="SEABANK">🔵 SEABANK</option>
+                <option value="GOPAY">🟢 GOPAY</option>
+                <option value="SHOPEEPAY">🟠 SHOPEEPAY</option>
+                <option value="DANA">🔵 DANA</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+          </div>
+
+          <!-- Category Selection (Hidden for Transfer) -->
+          <div class="form-group" id="categoryGroup">
             <label for="category">Kategori</label>
             <div class="select-wrapper">
               <select id="category" name="category" required>

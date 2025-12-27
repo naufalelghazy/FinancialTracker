@@ -242,6 +242,12 @@ body::before {
   box-shadow: 0 4px 15px var(--accent-income-glow);
 }
 
+.toggle-btn.active[data-type="transfer"] {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 15px var(--accent-primary-glow);
+}
+
 /* Transaction Form */
 .transaction-form {
   display: flex;
@@ -268,6 +274,10 @@ body::before {
   font-weight: 400;
   text-transform: none;
   color: var(--text-muted);
+}
+
+.form-group[hidden] {
+  display: none !important;
 }
 
 /* Amount Input */

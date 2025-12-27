@@ -24,12 +24,9 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -42,8 +39,8 @@
           <button id="settingsBtn" class="icon-btn" aria-label="Settings">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -52,16 +49,14 @@
               stroke-linejoin="round"
             >
               <circle cx="12" cy="12" r="3"></circle>
-              <path
-                d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.364-6.364l-4.243 4.243m-6.364 6.364l4.243-4.243m12.728 0l-4.243-4.243m-6.364-6.364L6.636 6.636"
-              ></path>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
           </button>
         </div>
       </header>
 
-      <!-- Main Content -->
-      <main class="main-content">
+      <!-- Input Page -->
+      <main class="main-content page-section" id="inputPage">
         <!-- Transaction Type Toggle -->
         <div class="transaction-toggle">
           <button
@@ -183,6 +178,40 @@
           </button>
         </form>
       </main>
+
+      <!-- Saldo Page -->
+      <section class="main-content page-section" id="saldoPage" hidden>
+        <div class="saldo-header">
+          <h2>💰 Saldo Akun</h2>
+          <button type="button" class="refresh-btn" id="refreshBalance">
+            🔄 Refresh
+          </button>
+        </div>
+        
+        <div class="total-balance-card">
+          <span class="total-label">Total Saldo</span>
+          <span class="total-amount" id="totalBalance">Rp 0</span>
+        </div>
+        
+        <div class="balance-list" id="balanceList">
+          <!-- Balance cards will be inserted here by JavaScript -->
+          <div class="loading-placeholder">
+            <span>Memuat data...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button type="button" class="nav-btn active" data-page="input">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Input</span>
+        </button>
+        <button type="button" class="nav-btn" data-page="saldo">
+          <span class="nav-icon">💰</span>
+          <span class="nav-label">Saldo</span>
+        </button>
+      </nav>
 
       <!-- Settings Modal -->
       <div id="settingsModal" class="modal" hidden>

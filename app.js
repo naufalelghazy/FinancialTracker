@@ -5,7 +5,6 @@
 // Categories Configuration
 const CATEGORIES = {
   pengeluaran: [
-    { value: "Pindah Akun", emoji: "🔄" },
     { value: "Kesehatan/Healthcare", emoji: "🏥" },
     { value: "Selfcare", emoji: "💆" },
     { value: "Subscriptions", emoji: "📺" },
@@ -34,7 +33,6 @@ const CATEGORIES = {
     { value: "Biaya Tak Terduga", emoji: "⚠️" },
   ],
   pemasukan: [
-    { value: "Pindah Akun", emoji: "🔄" },
     { value: "Gaji", emoji: "💵" },
     { value: "Kembalian Hutang", emoji: "🔙" },
     { value: "Interest", emoji: "📈" },
@@ -69,6 +67,14 @@ const elements = {
   toastIcon: document.querySelector(".toast-icon"),
   toastMessage: document.querySelector(".toast-message"),
   modalOverlay: document.querySelector(".modal-overlay"),
+  // Page Navigation
+  navBtns: document.querySelectorAll(".nav-btn"),
+  inputPage: document.getElementById("inputPage"),
+  saldoPage: document.getElementById("saldoPage"),
+  // Balance Elements
+  balanceList: document.getElementById("balanceList"),
+  totalBalance: document.getElementById("totalBalance"),
+  refreshBalance: document.getElementById("refreshBalance"),
 };
 
 // App State
@@ -158,6 +164,14 @@ function attachEventListeners() {
       e.preventDefault();
     }
   });
+
+  // Page Navigation
+  elements.navBtns.forEach((btn) => {
+    btn.addEventListener("click", () => handlePageSwitch(btn));
+  });
+
+  // Refresh Balance
+  elements.refreshBalance.addEventListener("click", fetchBalances);
 }
 
 // Handle transaction type toggle
@@ -419,6 +433,121 @@ function showToast(type, message) {
       elements.toast.hidden = true;
     }, 300);
   }, 3000);
+}
+
+// ============================================
+// PAGE NAVIGATION
+// ============================================
+
+// Handle page switch from bottom nav
+function handlePageSwitch(clickedBtn) {
+  const page = clickedBtn.dataset.page;
+  
+  // Update nav buttons
+  elements.navBtns.forEach((btn) => btn.classList.remove("active"));
+  clickedBtn.classList.add("active");
+  
+  // Switch pages
+  if (page === "input") {
+    elements.inputPage.hidden = false;
+    elements.saldoPage.hidden = true;
+  } else if (page === "saldo") {
+    elements.inputPage.hidden = true;
+    elements.saldoPage.hidden = false;
+    // Fetch balances when switching to saldo page
+    fetchBalances();
+  }
+  
+  // Haptic feedback
+  if (navigator.vibrate) {
+    navigator.vibrate(10);
+  }
+}
+
+// ============================================
+// BALANCE FUNCTIONS
+// ============================================
+
+// Account icons mapping (WebP images)
+const ACCOUNT_ICONS = {
+  BCA: "icons/banks/bca.webp",
+  MANDIRI: "icons/banks/mandiri.webp",
+  KROM: "icons/banks/krom.webp",
+  JAGO: "icons/banks/jago.webp",
+  SUPERBANK: "icons/banks/superbank.webp",
+  SEABANK: "icons/banks/seabank.webp",
+  GOPAY: "icons/banks/gopay.webp",
+  SHOPEEPAY: "icons/banks/shopeepay.webp",
+  DANA: "icons/banks/dana.webp",
+};
+
+// Fetch balances from Google Sheets via Apps Script
+async function fetchBalances() {
+  if (!state.scriptUrl) {
+    showToast("error", "⚠️ Silakan atur URL Google Apps Script di Settings");
+    return;
+  }
+  
+  // Show loading state
+  elements.balanceList.innerHTML = `
+    <div class="loading-placeholder">
+      <span>⏳ Memuat data...</span>
+    </div>
+  `;
+  
+  try {
+    // Fetch balance data from Apps Script
+    const response = await fetch(state.scriptUrl + "?action=getBalances");
+    const data = await response.json();
+    
+    if (data.status === "success") {
+      displayBalances(data.balances);
+    } else {
+      throw new Error(data.message || "Failed to fetch balances");
+    }
+  } catch (error) {
+    console.error("Error fetching balances:", error);
+    elements.balanceList.innerHTML = `
+      <div class="loading-placeholder">
+        <span>❌ Gagal memuat data. Coba refresh lagi.</span>
+      </div>
+    `;
+  }
+}
+
+// Display balances in the UI
+function displayBalances(balances) {
+  let totalSaldo = 0;
+  let html = "";
+  
+  for (const [account, amount] of Object.entries(balances)) {
+    totalSaldo += amount;
+    const iconPath = ACCOUNT_ICONS[account];
+    const iconHtml = iconPath 
+      ? `<img src="${iconPath}" class="account-icon-img" alt="${account}">`
+      : `<span class="account-icon-emoji">💰</span>`;
+    const formattedAmount = formatCurrency(amount);
+    const amountClass = amount >= 0 ? "positive" : "negative";
+    
+    html += `
+      <div class="balance-card">
+        <div class="account-info">
+          ${iconHtml}
+          <span class="account-name">${account}</span>
+        </div>
+        <span class="balance-amount ${amountClass}">${formattedAmount}</span>
+      </div>
+    `;
+  }
+  
+  elements.balanceList.innerHTML = html || '<div class="loading-placeholder"><span>Tidak ada data</span></div>';
+  elements.totalBalance.textContent = formatCurrency(totalSaldo);
+}
+
+// Format number as Indonesian Rupiah
+function formatCurrency(amount) {
+  const prefix = amount < 0 ? "-Rp " : "Rp ";
+  return prefix + Math.abs(amount).toLocaleString("id-ID");
 }
 
 // Initialize when DOM is ready

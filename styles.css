@@ -806,6 +806,7 @@ textarea::placeholder {
   font-size: var(--font-size-2xl);
   font-weight: 800;
   color: var(--text-white);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Balance List */
@@ -860,6 +861,10 @@ textarea::placeholder {
 .balance-card .balance-amount {
   font-weight: 700;
   font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 120px;
+  flex-shrink: 0;
 }
 
 .balance-card .balance-amount.positive {

@@ -16,18 +16,15 @@ Personal financial tracking app that syncs with Google Sheets.
 
 ## 🏦 Supported Accounts
 
-| Account   | Icon                                     |
-| --------- | ---------------------------------------- |
-| CASH      | 💵                                       |
-| BCA       | ![BCA](icons/banks/bca.webp)             |
-| MANDIRI   | ![Mandiri](icons/banks/mandiri.webp)     |
-| KROM      | ![Krom](icons/banks/krom.webp)           |
-| JAGO      | ![Jago](icons/banks/jago.webp)           |
-| SUPERBANK | ![Superbank](icons/banks/superbank.webp) |
-| SEABANK   | ![Seabank](icons/banks/seabank.webp)     |
-| GOPAY     | ![GoPay](icons/banks/gopay.webp)         |
-| SHOPEEPAY | ![ShopeePay](icons/banks/shopeepay.webp) |
-| DANA      | ![Dana](icons/banks/dana.webp)           |
+- BCA
+- Mandiri
+- Krom
+- Jago
+- Superbank
+- Seabank
+- GOPAY
+- SHOPEEPAY
+- DANA
 
 ## 📂 Categories
 

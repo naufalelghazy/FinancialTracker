@@ -499,7 +499,7 @@ function handlePageSwitch(clickedBtn) {
 // Data caching to reduce API calls
 let cachedBalances = null;
 let cacheTimestamp = null;
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 60000; // 60 seconds (1 minute)
 
 // Account icons mapping (WebP images)
 const ACCOUNT_ICONS = {

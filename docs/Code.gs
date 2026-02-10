@@ -23,7 +23,7 @@
  * G: Catatan       (notes opsional)
  */
 
-ffunction doPost(e) {
+function doPost(e) {
   try {
     // Get the active spreadsheet and sheet
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -36,7 +36,7 @@ ffunction doPost(e) {
     const formattedTimestamp = Utilities.formatDate(
       timestamp,
       Session.getScriptTimeZone(),
-      "yyyy-MM-dd HH:mm:ss"
+      "yyyy-MM-dd HH:mm:ss",
     );
 
     // Append row to sheet
@@ -56,7 +56,7 @@ ffunction doPost(e) {
         status: "success",
         message: "Data berhasil disimpan",
         timestamp: formattedTimestamp,
-      })
+      }),
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     // Return error response
@@ -64,7 +64,7 @@ ffunction doPost(e) {
       JSON.stringify({
         status: "error",
         message: error.toString(),
-      })
+      }),
     ).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -84,14 +84,14 @@ function doGet(e) {
         status: "ok",
         message: "Financial Tracker API is running",
         timestamp: new Date().toISOString(),
-      })
+      }),
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({
         status: "error",
         message: error.toString(),
-      })
+      }),
     ).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -106,16 +106,28 @@ function getBalances() {
       JSON.stringify({
         status: "error",
         message: "Sheet Dashboard tidak ditemukan",
-      })
+      }),
     ).setMimeType(ContentService.MimeType.JSON);
   }
 
-  // Read balance data from Dashboard (rows 7-16, columns C and D)
-  // Column C = Account name, Column E = Balance amount
+  // Read balance data from Dashboard
+  // Rows 7-16: Bank & E-wallet (10 accounts)
+  // Rows 21-25: Credit cards (5 accounts)
   const balances = {};
 
-  // Accounts are in rows 7-16
+  // Read bank & e-wallet accounts (rows 7-16)
   for (let row = 7; row <= 16; row++) {
+    const accountName = dashboard.getRange(row, 3).getValue(); // Column C
+    const balanceValue = dashboard.getRange(row, 4).getValue(); // Column D
+
+    if (accountName && balanceValue !== "") {
+      const numericBalance = Number(balanceValue) || 0;
+      balances[accountName] = numericBalance;
+    }
+  }
+
+  // Read credit card accounts (rows 21-25)
+  for (let row = 21; row <= 25; row++) {
     const accountName = dashboard.getRange(row, 3).getValue(); // Column C
     const balanceValue = dashboard.getRange(row, 4).getValue(); // Column D
 
@@ -134,7 +146,7 @@ function getBalances() {
       balances: balances,
       total: Number(totalSaldo),
       timestamp: new Date().toISOString(),
-    })
+    }),
   ).setMimeType(ContentService.MimeType.JSON);
 }
 

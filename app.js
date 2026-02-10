@@ -2,6 +2,16 @@
    Financial Tracker PWA - Application Logic
    ============================================ */
 
+// Credit Accounts Configuration
+// IMPORTANT: These names must EXACTLY match the account names in Google Sheets
+const CREDIT_ACCOUNTS = [
+  'Honest Card',
+  'Nex Card', 
+  'Kredivo',
+  'Spaylatter',
+  'Jago Loan'
+];
+
 // Categories Configuration
 const CATEGORIES = {
   pengeluaran: [
@@ -71,10 +81,14 @@ const elements = {
   navBtns: document.querySelectorAll(".nav-btn"),
   inputPage: document.getElementById("inputPage"),
   saldoPage: document.getElementById("saldoPage"),
+  tagihanPage: document.getElementById("tagihanPage"),
   // Balance Elements
   balanceList: document.getElementById("balanceList"),
   totalBalance: document.getElementById("totalBalance"),
   refreshBalance: document.getElementById("refreshBalance"),
+  // Bills Elements
+  billsList: document.getElementById("billsList"),
+  refreshBills: document.getElementById("refreshBills"),
 };
 
 // App State
@@ -172,6 +186,9 @@ function attachEventListeners() {
 
   // Refresh Balance
   elements.refreshBalance.addEventListener("click", fetchBalances);
+  
+  // Refresh Bills
+  elements.refreshBills.addEventListener("click", fetchBills);
 }
 
 // Handle transaction type toggle
@@ -447,15 +464,22 @@ function handlePageSwitch(clickedBtn) {
   elements.navBtns.forEach((btn) => btn.classList.remove("active"));
   clickedBtn.classList.add("active");
   
-  // Switch pages
+  // Hide all pages
+  elements.inputPage.hidden = true;
+  elements.saldoPage.hidden = true;
+  elements.tagihanPage.hidden = true;
+  
+  // Show selected page
   if (page === "input") {
     elements.inputPage.hidden = false;
-    elements.saldoPage.hidden = true;
   } else if (page === "saldo") {
-    elements.inputPage.hidden = true;
     elements.saldoPage.hidden = false;
     // Fetch balances when switching to saldo page
     fetchBalances();
+  } else if (page === "tagihan") {
+    elements.tagihanPage.hidden = false;
+    // Fetch bills when switching to tagihan page
+    fetchBills();
   }
   
   // Haptic feedback
@@ -479,6 +503,12 @@ const ACCOUNT_ICONS = {
   GOPAY: "icons/banks/gopay.webp",
   SHOPEEPAY: "icons/banks/shopeepay.webp",
   DANA: "icons/banks/dana.webp",
+  // Credit cards - using emoji fallback
+  'Honest Card': "icons/banks/honest.webp",
+  'Nex Card': "icons/banks/nex.webp",
+  'Kredivo': "icons/banks/kredivo.webp",
+  'Spaylatter': "icons/banks/spaylatter.webp",
+  'Jago Loan': "icons/banks/jagoloan.webp",
 };
 
 // Fetch balances from Google Sheets via Apps Script
@@ -521,11 +551,24 @@ function displayBalances(balances) {
   let html = "";
   
   for (const [account, amount] of Object.entries(balances)) {
+    const isCreditAccount = CREDIT_ACCOUNTS.includes(account);
+    
+    // Skip credit card accounts - they should only appear in Tagihan tab
+    if (isCreditAccount) {
+      // Don't include credit card balances in total
+      continue;
+    }
+    
+    // Only count bank & e-wallet accounts in total
     totalSaldo += amount;
     const iconPath = ACCOUNT_ICONS[account];
+    
+    // Icon: regular accounts use their icons or money emoji
     const iconHtml = iconPath 
       ? `<img src="${iconPath}" class="account-icon-img" alt="${account}">`
       : `<span class="account-icon-emoji">💰</span>`;
+    
+    // Amount styling: regular accounts
     const formattedAmount = formatCurrency(amount);
     const amountClass = amount >= 0 ? "positive" : "negative";
     
@@ -548,6 +591,106 @@ function displayBalances(balances) {
 function formatCurrency(amount) {
   const prefix = amount < 0 ? "-Rp " : "Rp ";
   return prefix + Math.abs(amount).toLocaleString("id-ID");
+}
+
+// ============================================
+// BILLS FUNCTIONS
+// ============================================
+
+// Fetch credit card bills (accounts with negative balance)
+async function fetchBills() {
+  if (!state.scriptUrl) {
+    showToast("error", "⚠️ Silakan atur URL Google Apps Script di Settings");
+    return;
+  }
+  
+  // Show loading state
+  elements.billsList.innerHTML = `
+    <div class="loading-placeholder">
+      <span>⏳ Memuat data...</span>
+    </div>
+  `;
+  
+  try {
+    // Fetch balance data from Apps Script
+    const response = await fetch(state.scriptUrl + "?action=getBalances");
+    const data = await response.json();
+    
+    if (data.status === "success") {
+      displayBills(data.balances);
+    } else {
+      throw new Error(data.message || "Failed to fetch bills");
+    }
+  } catch (error) {
+    console.error("Error fetching bills:", error);
+    elements.billsList.innerHTML = `
+      <div class="loading-placeholder">
+        <span>❌ Gagal memuat data. Coba refresh lagi.</span>
+      </div>
+    `;
+  }
+}
+
+// Display credit card bills in the UI
+function displayBills(balances) {
+  let html = "";
+  let totalDebt = 0;
+  
+  // Show ALL credit accounts, not just those with debt
+  for (const [account, amount] of Object.entries(balances)) {
+    const isCreditAccount = CREDIT_ACCOUNTS.includes(account);
+    
+    if (isCreditAccount) {
+      // Calculate debt (only negative balances count as debt)
+      if (amount < 0) {
+        totalDebt += Math.abs(amount);
+      }
+      
+      const iconPath = ACCOUNT_ICONS[account];
+      const iconHtml = iconPath 
+        ? `<img src="${iconPath}" class="account-icon-img" alt="${account}">`
+        : `<span class="account-icon-emoji">💳</span>`;
+      
+      // Show absolute value for negative (debt), or 0 for positive/zero
+      const displayAmount = amount < 0 ? Math.abs(amount) : 0;
+      const formattedAmount = formatCurrency(displayAmount);
+      
+      html += `
+        <div class="bill-card">
+          <div class="bill-info">
+            ${iconHtml}
+            <div class="bill-details">
+              <span class="bill-account">${account}</span>
+              <span class="bill-label">Tagihan</span>
+            </div>
+          </div>
+          <span class="bill-amount">${formattedAmount}</span>
+        </div>
+      `;
+    }
+  }
+  
+  // Show message if no bills (this should rarely happen now)
+  if (html === "") {
+    elements.billsList.innerHTML = `
+      <div class="no-bills">
+        <span class="no-bills-icon">✅</span>
+        <span class="no-bills-text">Tidak ada tagihan</span>
+        <span class="no-bills-subtext">Semua kartu kredit sudah lunas!</span>
+      </div>
+    `;
+    return;
+  }
+  
+  // Add total debt card at the top
+  const totalCard = `
+    <div class="total-debt-card">
+      <span class="total-debt-label">Total Tagihan</span>
+      <span class="total-debt-amount">${formatCurrency(totalDebt)}</span>
+    </div>
+  `;
+  
+  elements.billsList.innerHTML = totalCard + html;
 }
 
 // Initialize when DOM is ready

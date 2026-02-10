@@ -22,6 +22,8 @@
   --accent-income-glow: rgba(0, 201, 167, 0.3);
   --accent-primary: #667eea;
   --accent-primary-glow: rgba(102, 126, 234, 0.4);
+  --accent-credit: #ff4757;
+  --accent-credit-glow: rgba(255, 71, 87, 0.3);
 
   --border-color: rgba(0, 0, 0, 0.08);
   --border-focus: rgba(102, 126, 234, 0.5);
@@ -30,6 +32,7 @@
   --gradient-expense: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
   --gradient-income: linear-gradient(135deg, #00c9a7 0%, #00b894 100%);
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-credit: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
   --gradient-header: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B73FF 100%);
   --gradient-card: linear-gradient(
     135deg,
@@ -875,12 +878,186 @@ textarea::placeholder {
   color: var(--accent-expense);
 }
 
+/* Credit Badge */
+.credit-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--gradient-credit);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 4px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Credit Card Styling */
+.balance-card.credit {
+  border-color: var(--accent-credit);
+  border-width: 2px;
+  box-shadow: 0 4px 15px var(--accent-credit-glow);
+}
+
+.balance-card.credit:hover {
+  box-shadow: 0 6px 20px var(--accent-credit-glow);
+}
+
 /* Loading Placeholder */
 .loading-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
+  color: var(--text-muted);
+}
+
+/* ============================================
+   TAGIHAN PAGE
+   ============================================ */
+
+/* Tagihan Header */
+.tagihan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.tagihan-header h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+/* Bills List */
+.bills-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Total Debt Card */
+.total-debt-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  background: var(--gradient-credit);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-lg), 0 4px 20px var(--accent-credit-glow);
+  color: var(--text-white);
+}
+
+.total-debt-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.total-debt-amount {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--text-white);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bill Card */
+.bill-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--bg-card);
+  border: 2px solid var(--accent-credit);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  box-shadow: 0 2px 10px var(--accent-credit-glow);
+}
+
+.bill-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px var(--accent-credit-glow);
+}
+
+.bill-card .bill-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Bill Card Icon Styling */
+.bill-card .account-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.bill-card .account-icon-emoji {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bill-card .bill-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bill-card .bill-account {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.bill-card .bill-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.bill-card .bill-amount {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--accent-credit);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* No Bills State */
+.no-bills {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  text-align: center;
+  gap: var(--spacing-sm);
+}
+
+.no-bills-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.no-bills-text {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.no-bills-subtext {
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 

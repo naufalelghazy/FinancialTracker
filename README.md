@@ -16,6 +16,8 @@ Personal financial tracking app that syncs with Google Sheets.
 
 ## 🏦 Supported Accounts
 
+**Bank & E-Wallet:**
+
 - BCA
 - Mandiri
 - Krom
@@ -25,6 +27,14 @@ Personal financial tracking app that syncs with Google Sheets.
 - GOPAY
 - SHOPEEPAY
 - DANA
+
+**Kartu Kredit & Paylater:**
+
+- 💳 Honest Card
+- 💳 Nex Card
+- 💳 Kredivo
+- 💳 Spaylatter
+- 💳 Jago Loan
 
 ## 📂 Categories
 
@@ -78,6 +88,28 @@ Gaji, Kembalian Hutang, Interest, Loan, Cashback, Gift
 1. Tap **Saldo** on bottom navigation
 2. View all account balances
 3. Tap 🔄 Refresh to update
+
+### Use Credit Card / Paylater
+
+**Belanja dengan Kartu Kredit:**
+
+1. Select **Keluar** (expense)
+2. Choose credit card account (e.g., HONEST_CARD)
+3. Select category and enter amount
+4. Save - debt will be tracked as negative balance
+
+**Bayar Tagihan:**
+
+1. Select **Transfer**
+2. From account: Your bank (e.g., BCA)
+3. To account: Credit card (e.g., HONEST_CARD)
+4. Enter payment amount and save
+
+**View Credit Debt:**
+
+- Credit cards show with 💳 icon and "KREDIT" badge
+- Negative balance = debt (shown in red)
+- Positive balance = overpayment (shown in green)
 
 ## 🛠️ Tech Stack
 

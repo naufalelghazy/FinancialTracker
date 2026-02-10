@@ -842,15 +842,16 @@ textarea::placeholder {
   gap: var(--spacing-md);
 }
 
-.balance-card .account-icon {
-  font-size: 1.5rem;
+/* Base icon styles - shared across all icons */
+.account-icon-img {
+  object-fit: contain;
+  border-radius: var(--radius-sm);
 }
 
+/* Icon size variants */
 .balance-card .account-icon-img {
   width: 32px;
   height: 32px;
-  object-fit: contain;
-  border-radius: var(--radius-sm);
 }
 
 .balance-card .account-icon-emoji {
@@ -899,6 +900,11 @@ textarea::placeholder {
   box-shadow: 0 4px 15px var(--accent-credit-glow);
 }
 
+.balance-card.credit .balance-amount {
+  color: var(--accent-credit);
+  font-weight: 800;
+}
+
 .balance-card.credit:hover {
   box-shadow: 0 6px 20px var(--accent-credit-glow);
 }
@@ -916,6 +922,12 @@ textarea::placeholder {
    TAGIHAN PAGE
    ============================================ */
 
+#tagihanPage {
+  padding: var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-lg) + 70px);
+  overflow-y: auto;
+}
+
 /* Tagihan Header */
 .tagihan-header {
   display: flex;
@@ -927,6 +939,10 @@ textarea::placeholder {
 .tagihan-header h2 {
   font-size: var(--font-size-xl);
   font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 /* Bills List */
@@ -938,31 +954,29 @@ textarea::placeholder {
 
 /* Total Debt Card */
 .total-debt-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xl);
   background: var(--gradient-credit);
+  padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-lg), 0 4px 20px var(--accent-credit-glow);
-  color: var(--text-white);
+  text-align: center;
+  box-shadow: 0 4px 20px var(--accent-credit-glow);
 }
 
 .total-debt-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
   font-size: var(--font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  opacity: 0.9;
-  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--spacing-xs);
 }
 
 .total-debt-amount {
-  font-size: var(--font-size-2xl);
+  display: block;
+  color: white;
+  font-size: 2rem;
   font-weight: 800;
-  color: var(--text-white);
   font-variant-numeric: tabular-nums;
 }
 
@@ -994,8 +1008,6 @@ textarea::placeholder {
 .bill-card .account-icon-img {
   width: 48px;
   height: 48px;
-  object-fit: contain;
-  border-radius: var(--radius-sm);
 }
 
 .bill-card .account-icon-emoji {

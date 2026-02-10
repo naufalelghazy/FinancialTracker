@@ -4,13 +4,13 @@
 
 // Credit Accounts Configuration
 // IMPORTANT: These names must EXACTLY match the account names in Google Sheets
-const CREDIT_ACCOUNTS = [
+const CREDIT_ACCOUNTS = new Set([
   'Honest Card',
   'Nex Card', 
   'Kredivo',
   'Spaylatter',
   'Jago Loan'
-];
+]);
 
 // Categories Configuration
 const CATEGORIES = {
@@ -492,6 +492,11 @@ function handlePageSwitch(clickedBtn) {
 // BALANCE FUNCTIONS
 // ============================================
 
+// Data caching to reduce API calls
+let cachedBalances = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 30000; // 30 seconds
+
 // Account icons mapping (WebP images)
 const ACCOUNT_ICONS = {
   BCA: "icons/banks/bca.webp",
@@ -511,13 +516,42 @@ const ACCOUNT_ICONS = {
   'Jago Loan': "icons/banks/jagoloan.webp",
 };
 
-// Fetch balances from Google Sheets via Apps Script
-async function fetchBalances() {
+// Centralized function to fetch account data with caching
+async function fetchAccountData(forceRefresh = false) {
   if (!state.scriptUrl) {
     showToast("error", "⚠️ Silakan atur URL Google Apps Script di Settings");
-    return;
+    return null;
   }
   
+  const now = Date.now();
+  
+  // Return cached data if valid
+  if (!forceRefresh && cachedBalances && (now - cacheTimestamp) < CACHE_DURATION) {
+    return cachedBalances;
+  }
+  
+  try {
+    // Fetch new data
+    const response = await fetch(state.scriptUrl + "?action=getBalances");
+    const data = await response.json();
+    
+    if (data.status === "success") {
+      // Update cache
+      cachedBalances = data.balances;
+      cacheTimestamp = now;
+      return cachedBalances;
+    } else {
+      throw new Error(data.message || "Failed to fetch data");
+    }
+  } catch (error) {
+    console.error("Error fetching account data:", error);
+    showToast("error", "❌ Gagal memuat data");
+    return null;
+  }
+}
+
+// Fetch balances from Google Sheets via Apps Script
+async function fetchBalances() {
   // Show loading state
   elements.balanceList.innerHTML = `
     <div class="loading-placeholder">
@@ -525,18 +559,11 @@ async function fetchBalances() {
     </div>
   `;
   
-  try {
-    // Fetch balance data from Apps Script
-    const response = await fetch(state.scriptUrl + "?action=getBalances");
-    const data = await response.json();
-    
-    if (data.status === "success") {
-      displayBalances(data.balances);
-    } else {
-      throw new Error(data.message || "Failed to fetch balances");
-    }
-  } catch (error) {
-    console.error("Error fetching balances:", error);
+  const balances = await fetchAccountData();
+  
+  if (balances) {
+    displayBalances(balances);
+  } else {
     elements.balanceList.innerHTML = `
       <div class="loading-placeholder">
         <span>❌ Gagal memuat data. Coba refresh lagi.</span>
@@ -545,34 +572,30 @@ async function fetchBalances() {
   }
 }
 
+// Helper function to generate account icon HTML
+function getAccountIconHTML(account, fallbackEmoji = '💰') {
+  const iconPath = ACCOUNT_ICONS[account];
+  return iconPath 
+    ? `<img src="${iconPath}" class="account-icon-img" alt="${account}">`
+    : `<span class="account-icon-emoji">${fallbackEmoji}</span>`;
+}
+
 // Display balances in the UI
 function displayBalances(balances) {
-  let totalSaldo = 0;
-  let html = "";
+  // Filter non-credit accounts
+  const bankAccounts = Object.entries(balances)
+    .filter(([account]) => !CREDIT_ACCOUNTS.has(account));
   
-  for (const [account, amount] of Object.entries(balances)) {
-    const isCreditAccount = CREDIT_ACCOUNTS.includes(account);
-    
-    // Skip credit card accounts - they should only appear in Tagihan tab
-    if (isCreditAccount) {
-      // Don't include credit card balances in total
-      continue;
-    }
-    
-    // Only count bank & e-wallet accounts in total
-    totalSaldo += amount;
-    const iconPath = ACCOUNT_ICONS[account];
-    
-    // Icon: regular accounts use their icons or money emoji
-    const iconHtml = iconPath 
-      ? `<img src="${iconPath}" class="account-icon-img" alt="${account}">`
-      : `<span class="account-icon-emoji">💰</span>`;
-    
-    // Amount styling: regular accounts
+  // Calculate total
+  const totalSaldo = bankAccounts.reduce((sum, [, amount]) => sum + amount, 0);
+  
+  // Generate HTML
+  const html = bankAccounts.map(([account, amount]) => {
+    const iconHtml = getAccountIconHTML(account, '💰');
     const formattedAmount = formatCurrency(amount);
     const amountClass = amount >= 0 ? "positive" : "negative";
     
-    html += `
+    return `
       <div class="balance-card">
         <div class="account-info">
           ${iconHtml}
@@ -581,7 +604,7 @@ function displayBalances(balances) {
         <span class="balance-amount ${amountClass}">${formattedAmount}</span>
       </div>
     `;
-  }
+  }).join('');
   
   elements.balanceList.innerHTML = html || '<div class="loading-placeholder"><span>Tidak ada data</span></div>';
   elements.totalBalance.textContent = formatCurrency(totalSaldo);
@@ -599,11 +622,6 @@ function formatCurrency(amount) {
 
 // Fetch credit card bills (accounts with negative balance)
 async function fetchBills() {
-  if (!state.scriptUrl) {
-    showToast("error", "⚠️ Silakan atur URL Google Apps Script di Settings");
-    return;
-  }
-  
   // Show loading state
   elements.billsList.innerHTML = `
     <div class="loading-placeholder">
@@ -611,18 +629,11 @@ async function fetchBills() {
     </div>
   `;
   
-  try {
-    // Fetch balance data from Apps Script
-    const response = await fetch(state.scriptUrl + "?action=getBalances");
-    const data = await response.json();
-    
-    if (data.status === "success") {
-      displayBills(data.balances);
-    } else {
-      throw new Error(data.message || "Failed to fetch bills");
-    }
-  } catch (error) {
-    console.error("Error fetching bills:", error);
+  const balances = await fetchAccountData();
+  
+  if (balances) {
+    displayBills(balances);
+  } else {
     elements.billsList.innerHTML = `
       <div class="loading-placeholder">
         <span>❌ Gagal memuat data. Coba refresh lagi.</span>
@@ -633,44 +644,36 @@ async function fetchBills() {
 
 // Display credit card bills in the UI
 function displayBills(balances) {
-  let html = "";
-  let totalDebt = 0;
+  // Filter credit accounts
+  const creditAccounts = Object.entries(balances)
+    .filter(([account]) => CREDIT_ACCOUNTS.has(account));
   
-  // Show ALL credit accounts, not just those with debt
-  for (const [account, amount] of Object.entries(balances)) {
-    const isCreditAccount = CREDIT_ACCOUNTS.includes(account);
+  // Calculate total debt (only negative balances)
+  const totalDebt = creditAccounts
+    .filter(([, amount]) => amount < 0)
+    .reduce((sum, [, amount]) => sum + Math.abs(amount), 0);
+  
+  // Generate HTML for all credit accounts
+  const html = creditAccounts.map(([account, amount]) => {
+    const iconHtml = getAccountIconHTML(account, '💳');
+    const displayAmount = amount < 0 ? Math.abs(amount) : 0;
+    const formattedAmount = formatCurrency(displayAmount);
     
-    if (isCreditAccount) {
-      // Calculate debt (only negative balances count as debt)
-      if (amount < 0) {
-        totalDebt += Math.abs(amount);
-      }
-      
-      const iconPath = ACCOUNT_ICONS[account];
-      const iconHtml = iconPath 
-        ? `<img src="${iconPath}" class="account-icon-img" alt="${account}">`
-        : `<span class="account-icon-emoji">💳</span>`;
-      
-      // Show absolute value for negative (debt), or 0 for positive/zero
-      const displayAmount = amount < 0 ? Math.abs(amount) : 0;
-      const formattedAmount = formatCurrency(displayAmount);
-      
-      html += `
-        <div class="bill-card">
-          <div class="bill-info">
-            ${iconHtml}
-            <div class="bill-details">
-              <span class="bill-account">${account}</span>
-              <span class="bill-label">Tagihan</span>
-            </div>
+    return `
+      <div class="bill-card">
+        <div class="bill-info">
+          ${iconHtml}
+          <div class="bill-details">
+            <span class="bill-account">${account}</span>
+            <span class="bill-label">Tagihan</span>
           </div>
-          <span class="bill-amount">${formattedAmount}</span>
         </div>
-      `;
-    }
-  }
+        <span class="bill-amount">${formattedAmount}</span>
+      </div>
+    `;
+  }).join('');
   
-  // Show message if no bills (this should rarely happen now)
+  // Show message if no credit accounts found
   if (html === "") {
     elements.billsList.innerHTML = `
       <div class="no-bills">

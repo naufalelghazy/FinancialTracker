@@ -184,11 +184,15 @@ function attachEventListeners() {
     btn.addEventListener("click", () => handlePageSwitch(btn));
   });
 
-  // Refresh Balance
-  elements.refreshBalance.addEventListener("click", fetchBalances);
+  // Refresh Balance - force refresh to bypass cache
+  elements.refreshBalance.addEventListener("click", () => {
+    fetchBalances(true); // forceRefresh = true
+  });
   
-  // Refresh Bills
-  elements.refreshBills.addEventListener("click", fetchBills);
+  // Refresh Bills - force refresh to bypass cache
+  elements.refreshBills.addEventListener("click", () => {
+    fetchBills(true); // forceRefresh = true
+  });
 }
 
 // Handle transaction type toggle
@@ -551,7 +555,7 @@ async function fetchAccountData(forceRefresh = false) {
 }
 
 // Fetch balances from Google Sheets via Apps Script
-async function fetchBalances() {
+async function fetchBalances(forceRefresh = false) {
   // Show loading state
   elements.balanceList.innerHTML = `
     <div class="loading-placeholder">
@@ -559,7 +563,7 @@ async function fetchBalances() {
     </div>
   `;
   
-  const balances = await fetchAccountData();
+  const balances = await fetchAccountData(forceRefresh);
   
   if (balances) {
     displayBalances(balances);
@@ -621,7 +625,7 @@ function formatCurrency(amount) {
 // ============================================
 
 // Fetch credit card bills (accounts with negative balance)
-async function fetchBills() {
+async function fetchBills(forceRefresh = false) {
   // Show loading state
   elements.billsList.innerHTML = `
     <div class="loading-placeholder">
@@ -629,7 +633,7 @@ async function fetchBills() {
     </div>
   `;
   
-  const balances = await fetchAccountData();
+  const balances = await fetchAccountData(forceRefresh);
   
   if (balances) {
     displayBills(balances);

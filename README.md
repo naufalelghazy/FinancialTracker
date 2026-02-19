@@ -22,7 +22,7 @@ Personal financial tracking app that syncs with Google Sheets.
 - Mandiri
 - Krom
 - Jago
-- Superbank
+- Sampoerna
 - Seabank
 - GOPAY
 - SHOPEEPAY

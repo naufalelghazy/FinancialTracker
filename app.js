@@ -507,7 +507,7 @@ const ACCOUNT_ICONS = {
   MANDIRI: "icons/banks/mandiri.webp",
   KROM: "icons/banks/krom.webp",
   JAGO: "icons/banks/jago.webp",
-  SUPERBANK: "icons/banks/superbank.webp",
+  SAMPOERNA: "icons/banks/sampoerna.webp",
   SEABANK: "icons/banks/seabank.webp",
   GOPAY: "icons/banks/gopay.webp",
   SHOPEEPAY: "icons/banks/shopeepay.webp",

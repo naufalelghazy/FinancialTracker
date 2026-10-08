@@ -62,8 +62,13 @@ function errorResponse(message) {
 
 // Returns true if no API_TOKEN is configured, or if the token matches
 function isAuthorized(token) {
-  const expected =
-    PropertiesService.getScriptProperties().getProperty("API_TOKEN");
+  const cache = CacheService.getScriptCache();
+  let expected = cache.get("API_TOKEN_CACHE");
+  if (expected === null) {
+    expected =
+      PropertiesService.getScriptProperties().getProperty("API_TOKEN") || "";
+    cache.put("API_TOKEN_CACHE", expected, CONFIG.DEDUPE_TTL_SECONDS);
+  }
   return !expected || token === expected;
 }
 
@@ -158,7 +163,6 @@ function doPost(e) {
     sheet
       .getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length)
       .setValues(rows);
-    SpreadsheetApp.flush();
 
     if (data.requestId) {
       cache.put("req_" + data.requestId, "1", CONFIG.DEDUPE_TTL_SECONDS);

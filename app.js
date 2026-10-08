@@ -356,19 +356,23 @@ function enqueue(payload) {
 }
 
 // Send queued transactions one by one (in order)
-async function flushPendingQueue() {
+async function flushPendingQueue(notifyOnSuccess = true) {
   if (state.isSyncing || !state.scriptUrl || !navigator.onLine) return;
-  let queue = getQueue();
-  if (queue.length === 0) return;
 
   state.isSyncing = true;
   let sent = 0;
 
   try {
-    while (queue.length > 0) {
+    while (true) {
+      const queue = getQueue();
+      if (queue.length === 0) break;
+
       await postTransactions(queue[0]);
-      queue.shift();
-      setQueue(queue);
+
+      // Successfully sent, remove the first item from queue
+      const updatedQueue = getQueue();
+      updatedQueue.shift();
+      setQueue(updatedQueue);
       sent++;
     }
   } catch (error) {
@@ -382,7 +386,9 @@ async function flushPendingQueue() {
 
   if (sent > 0) {
     invalidateBalanceCache();
-    showToast("success", `🔄 ${sent} transaksi offline berhasil disinkron`);
+    if (notifyOnSuccess) {
+      showToast("success", `🔄 ${sent} transaksi offline berhasil disinkron`);
+    }
   }
 }
 
@@ -480,38 +486,20 @@ async function handleSubmit(e) {
 
   const payload = { requestId: generateId(), transactions };
 
-  // Offline: save locally and sync later
-  if (!navigator.onLine) {
-    enqueue(payload);
-    showToast("warning", "📴 Offline — disimpan & akan disinkron otomatis");
-    resetForm();
-    return;
+  // Optimistic UI: Form langsung direset & notifikasi langsung muncul seketika (0 detik)
+  resetForm();
+  showToast("success", successMessage);
+  if (navigator.vibrate) {
+    navigator.vibrate([50, 50, 50]);
   }
+  invalidateBalanceCache();
 
-  setLoading(true);
+  // Simpan ke antrean lokal (aman dari kehilangan data)
+  enqueue(payload);
 
-  try {
-    await postTransactions(payload);
-    invalidateBalanceCache();
-    showToast("success", successMessage);
-    resetForm();
-
-    if (navigator.vibrate) {
-      navigator.vibrate([50, 50, 50]);
-    }
-  } catch (error) {
-    console.error("Error submitting transaction:", error);
-    if (error instanceof ApiError) {
-      // Server rejected the data - keep the form so the user can fix/retry
-      showToast("error", `❌ ${error.message}`);
-    } else {
-      // Network error - queue it so nothing is lost
-      enqueue(payload);
-      showToast("warning", "📴 Koneksi gagal — disimpan & akan disinkron");
-      resetForm();
-    }
-  } finally {
-    setLoading(false);
+  // Kirim ke Google Sheets di latar belakang
+  if (navigator.onLine) {
+    flushPendingQueue(false);
   }
 }
 

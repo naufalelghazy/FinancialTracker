@@ -8,10 +8,11 @@ Personal financial tracking app that syncs with Google Sheets.
 - 🎨 Modern Purple Gradient UI Theme
 - 💳 Track income & expenses
 - 🔄 Transfer between accounts
-- 🏦 10 bank accounts with custom icons
+- 🏦 10 bank/e-wallet accounts (incl. CASH) + 5 credit/paylater accounts
 - 💰 View account balances (Dashboard)
 - 📊 Auto-sync to Google Sheets
-- 📴 Offline support
+- 📴 Offline queue (transactions auto-sync when back online)
+- 🔐 Optional API token protection
 - 🔢 Number formatting with thousand separators
 
 ## 🏦 Supported Accounts
@@ -60,12 +61,26 @@ Gaji, Kembalian Hutang, Interest, Loan, Cashback, Gift
 4. Set "Who has access" to **Anyone**
 5. Copy the deployment URL
 
-### 3. Configure App
+### 3. (Optional) Secure the API
+
+1. In Apps Script: **Project Settings → Script Properties → Add property**
+2. Name: `API_TOKEN`, Value: a secret string
+3. Enter the same token in the app's Settings
+
+### 4. Configure App
 
 1. Open the app
 2. Click ⚙️ Settings
-3. Paste your Apps Script URL
+3. Paste your Apps Script URL (and API token if set)
 4. Save
+
+### Updating the Apps Script
+
+After changing `docs/Code.gs`: **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. The URL stays the same.
+
+### Adding / Renaming Accounts
+
+Edit the `ACCOUNTS` array at the top of `app.js` (name must match the Dashboard sheet exactly), and adjust `BANK_ROWS` / `CREDIT_ROWS` in `Code.gs` if the Dashboard layout changes.
 
 ## 📖 Usage
 

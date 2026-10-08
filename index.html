@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#0f0f23" />
+    <meta name="theme-color" content="#667eea" />
     <meta
       name="description"
       content="Personal Financial Tracker - Track income and expenses"
@@ -100,22 +100,8 @@
             <label for="account" id="accountLabel">Akun</label>
             <div class="select-wrapper">
               <select id="account" name="account" required>
-                 <option value="">Pilih Akun</option>
-                <option value="CASH">💵 CASH</option>
-                <option value="BCA">🔵 BCA</option>
-                <option value="MANDIRI">🟡 MANDIRI</option>
-                <option value="KROM">🟣 KROM</option>
-                <option value="JAGO">🟡 JAGO</option>
-                <option value="SAMPOERNA">🟠 SAMPOERNA</option>
-                <option value="SEABANK">🔵 SEABANK</option>
-                <option value="GOPAY">🟢 GOPAY</option>
-                <option value="SHOPEEPAY">🟠 SHOPEEPAY</option>
-                <option value="DANA">🔵 DANA</option>
-                <option value="Honest Card">💳 Honest Card</option>
-                <option value="Nex Card">💳 Nex Card</option>
-                <option value="Kredivo">💳 Kredivo</option>
-                <option value="Spaylatter">💳 Spaylatter</option>
-                <option value="Jago Loan">💳 Jago Loan</option>
+                <option value="">Pilih Akun</option>
+                <!-- Options generated from ACCOUNTS in app.js -->
               </select>
               <span class="select-arrow">▼</span>
             </div>
@@ -127,21 +113,7 @@
             <div class="select-wrapper">
               <select id="destAccount" name="destAccount">
                 <option value="">Pilih Akun Tujuan</option>
-                <option value="CASH">💵 CASH</option>
-                <option value="BCA">🔵 BCA</option>
-                <option value="MANDIRI">🟡 MANDIRI</option>
-                <option value="KROM">🟣 KROM</option>
-                <option value="JAGO">🟡 JAGO</option>
-                <option value="SAMPOERNA">🟠 SAMPOERNA</option>
-                <option value="SEABANK">🔵 SEABANK</option>
-                <option value="GOPAY">🟢 GOPAY</option>
-                <option value="SHOPEEPAY">🟠 SHOPEEPAY</option>
-                <option value="DANA">🔵 DANA</option>
-                <option value="Honest Card">💳 Honest Card</option>
-                <option value="Nex Card">💳 Nex Card</option>
-                <option value="Kredivo">💳 Kredivo</option>
-                <option value="Spaylatter">💳 Spaylatter</option>
-                <option value="Jago Loan">💳 Jago Loan</option>
+                <!-- Options generated from ACCOUNTS in app.js -->
               </select>
               <span class="select-arrow">▼</span>
             </div>
@@ -181,8 +153,8 @@
           <button type="submit" class="submit-btn" id="submitBtn">
             <span class="btn-text">Simpan Transaksi</span>
             <span class="btn-loader" hidden>
-              <svg class="spinner" viewBox="0 0 24 24">
-        
+              <svg class="spinner" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
               </svg>
             </span>
           </button>
@@ -264,6 +236,21 @@
               />
               <p class="help-text">
                 Masukkan URL deployment dari Google Apps Script Anda
+              </p>
+            </div>
+            <div class="form-group">
+              <label for="apiToken"
+                >API Token <span class="optional">(opsional)</span></label
+              >
+              <input
+                type="password"
+                id="apiToken"
+                autocomplete="off"
+                placeholder="Token rahasia"
+              />
+              <p class="help-text">
+                Harus sama dengan Script Property <code>API_TOKEN</code> di
+                Apps Script
               </p>
             </div>
             <button type="button" class="save-settings-btn" id="saveSettings">

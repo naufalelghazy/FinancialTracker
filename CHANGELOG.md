@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-10-08
+
+### Added
+
+- 📴 **Offline Queue** - Transactions saved while offline / on network failure are queued and auto-synced when back online
+- 🔐 **Optional API Token** - Protect the Apps Script endpoint via Script Property `API_TOKEN`
+- ♻️ **Duplicate Protection** - Each request has a `requestId`; retries are ignored by the backend
+
+### Changed
+
+- 🔄 **Atomic Transfer** - Both transfer legs are sent in a single request and written in one `setValues` call
+- 📡 **Real Error Handling** - Replaced `no-cors` POST with a readable `text/plain` request; server errors are now shown instead of a fake success
+- 📋 **Single Account Config** - Account dropdowns, icons and credit detection all come from `ACCOUNTS` in `app.js`
+- ⚡ **Service Worker** - Network-first for app code (updates appear immediately), cache-first for images & fonts, bank icons precached
+- 📦 **Apps Script** - Writes to sheet `Main` by name, validates input, uses `LockService`, reads balances with batch `getValues()`
+
+### Fixed
+
+- 🐛 Loading spinner on submit button was invisible
+- 🐛 Rapid toasts flickered / hid too early
+- ♿ Pinch-zoom re-enabled; theme color matches UI
+
+> ⚠️ Requires re-deploying `docs/Code.gs` (Manage deployments → Edit → New version).
+
 ## [2.1.0] - 2026-02-10
 
 ### Added

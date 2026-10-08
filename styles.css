@@ -83,6 +83,11 @@
   padding: 0;
 }
 
+/* Ensure the hidden attribute always wins over component display rules */
+[hidden] {
+  display: none !important;
+}
+
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
@@ -460,6 +465,14 @@ textarea::placeholder {
   animation: spin 1s linear infinite;
 }
 
+.spinner circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 44 20;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -560,20 +573,22 @@ textarea::placeholder {
   gap: var(--spacing-lg);
 }
 
-.modal-body input[type="url"] {
+.modal-body input[type="url"],
+.modal-body input[type="password"] {
   width: 100%;
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-family: inherit;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--text-primary);
   outline: none;
   transition: all var(--transition-base);
 }
 
-.modal-body input[type="url"]:focus {
+.modal-body input[type="url"]:focus,
+.modal-body input[type="password"]:focus {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 3px var(--accent-primary-glow);
 }
@@ -639,6 +654,10 @@ textarea::placeholder {
 
 .toast.error {
   border-color: var(--accent-expense);
+}
+
+.toast.warning {
+  border-color: #f5a623;
 }
 
 .toast-icon {
